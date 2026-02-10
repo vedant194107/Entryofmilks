@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monthly Report</title>
+</head>
+<body>
+
+<h2>Monthly Report</h2>
+
+<form method="get">
+    <input type="month" name="month" value="{{ month }}">
+    <button type="submit">View</button>
+</form>
+
+<hr>
+
+<h3>Total Liter: {{ total_liter }} L</h3>
+<h3>Total Amount: ₹{{ total_amount }}</h3>
+
+<table border="1">
+<tr>
+    <th>Date</th>
+    <th>Liter</th>
+    <th>Amount</th>
+</tr>
+{% for e in entries %}
+<tr>
+    <td>{{ e.date }}</td>
+    <td>{{ e.liter }}</td>
+    <td>₹{{ e.amount }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<a href="/monthly-excel/?month={{ month }}">Download Excel</a>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Entry</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body style="background:#f4f6f9; font-family:Arial, sans-serif;">
+
+<div style="
+    max-width:420px;
+    margin:60px auto;
+    background:#ffffff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.1);
+">
+
+    <h2 style="text-align:center; margin-bottom:20px;">
+        ✏️ Edit Milk Entry
+    </h2>
+
+    <p><strong>Date:</strong> {{ entry.date }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- PRICE UPDATE -->
+        <label style="font-weight:600;">Price per Liter (₹)</label>
+        <input type="number" step="0.01"
+               name="price_per_liter"
+               value="{{ entry.price_per_liter }}"
+               required
+               style="
+                   width:100%;
+                   padding:10px;
+                   margin-top:6px;
+                   margin-bottom:15px;
+                   border-radius:6px;
+                   border:1px solid #ced4da;
+               ">
+
+        <!-- LITER UPDATE -->
+        <label style="font-weight:600;">Milk Quantity</label>
+        <select name="liter" style="
+            width:100%;
+            padding:10px;
+            margin-top:6px;
+            margin-bottom:20px;
+            border-radius:6px;
+            border:1px solid #ced4da;
+        ">
+            <option value="0.5" {% if entry.liter == 0.5 %}selected{% endif %}>0.5 L</option>
+            <option value="1" {% if entry.liter == 1 %}selected{% endif %}>1 L</option>
+            <option value="2" {% if entry.liter == 2 %}selected{% endif %}>2 L</option>
+            <option value="5" {% if entry.liter == 5 %}selected{% endif %}>5 L</option>
+            <option value="6" {% if entry.liter == 6 %}selected{% endif %}>6 L</option>
+        </select>
+
+        <button type="submit" style="
+            width:100%;
+            padding:10px;
+            background:#198754;
+            color:#ffffff;
+            border:none;
+            border-radius:6px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            margin-bottom:10px;
+        ">
+            Update Entry & Price
+        </button>
+
+        <a href="/" style="
+            display:block;
+            text-align:center;
+            padding:9px;
+            text-decoration:none;
+            color:#6c757d;
+            font-weight:600;
+        ">
+            Cancel
+        </a>
+    </form>
+
+</div>
+
+</body>
+</html>
