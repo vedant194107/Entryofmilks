@@ -18,7 +18,8 @@
           <form method="post" class="row g-3 align-items-end">
             {% csrf_token %}
             <div class="col-md-6">
-              <label class="form-label">Price per Liter</label>
+              {% comment %} <label class="form-label">Price per Liter</label> {% endcomment %}
+              <b><label class="form-label">લિટર દીઠ કિંમત</label></b>
 
               <input type="number" step="0.01" name="price_per_liter" value="{{ price.price_per_liter|default:'' }}" class="form-control" required />
             </div>
@@ -50,13 +51,16 @@
           <form method="post" class="row g-3 align-items-end">
             {% csrf_token %}
             <div class="col-md-4">
-              <label class="form-label">Milk Quantity</label>
+              {% comment %} <label class="form-label">Milk Quantity</label> {% endcomment %}
+              {% comment %} <label class="form-label">દૂધનો જથ્થો</label> {% endcomment %}
+              <b><label class="form-label">કેટલા લિટર દૂધ?</label></b>
               <select name="liter" class="form-select">
-                <option value="0.5">0.5 L</option>
-                <option value="1">1 L</option>
-                <option value="2">2 L</option>
-                <option value="5">5 L</option>
-                <option value="6">6 L</option>
+                <option value="4">4 લિટર</option>
+                <option value="5">5 લિટર</option>
+                <option value="6">6 લિટર</option>
+                <option value="8">8 લિટર</option>
+                <option value="10">10 લિટર</option>
+                <option value="12">12 લિટર</option>
               </select>
             </div>
             <div class="col-md-3">
@@ -71,7 +75,8 @@
         <div class="col-md-6">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              <h6 class="text-muted">Total Liter</h6>
+              {% comment %} <h6 class="text-muted">Total Liter</h6> {% endcomment %}
+              <h6 class="text-muted">કુલ લિટર</h6>
               <h2 class="text-primary">{{ total_liter }} L</h2>
             </div>
           </div>
@@ -79,7 +84,8 @@
         <div class="col-md-6">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              <h6 class="text-muted">Total Amount</h6>
+              <h6 class="text-muted">કુલ રકમ</h6>
+              {% comment %} <h6 class="text-muted">Total Amount</h6> {% endcomment %}
               <h2 class="text-success">₹ {{ total_amount }}</h2>
             </div>
           </div>
