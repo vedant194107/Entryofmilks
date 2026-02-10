@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils.timezone import localtime
-from datetime import datetime
 import openpyxl
 from reportlab.pdfgen import canvas
 
@@ -9,8 +8,11 @@ from .models import Price, Entry
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Entry
 
+MILK_PRICES = {
+    'cow': 42,
+    'buffalo': 88,
+}
 
 
 def dashboard(request):
@@ -33,22 +35,32 @@ def dashboard(request):
     # -----------------------------
     # HANDLE ENTRY ADD
     # -----------------------------
+    
     if request.method == "POST" and 'liter' in request.POST:
-        if not price:
-            return redirect('dashboard')
 
-        liter = float(request.POST['liter'])
-        amount = liter * price.price_per_liter
+     milk_type = request.POST.get('milk_type')
+     liter = float(request.POST.get('liter'))
 
-        Entry.objects.create(
-            liter=liter,
-            price_per_liter=price.price_per_liter,
-            amount=amount
-        )
-        return redirect('dashboard')
+     if not milk_type:
+         return redirect('dashboard')
+
+     price_per_liter = MILK_PRICES.get(milk_type)
+
+     Entry.objects.create(
+         milk_type=milk_type,
+         liter=liter,
+         price_per_liter=price_per_liter,
+         amount=liter * price_per_liter
+     )
+
+     return redirect('dashboard')
+
+
+
+
 
     # -----------------------------
-    # DATE FILTER (USING created_at)
+    # DATE FILTER
     # -----------------------------
     selected_date = request.GET.get('date')
 
@@ -72,10 +84,10 @@ def dashboard(request):
 
 
 # =====================================================
-# MONTHLY REPORT (HTML)
+# MONTHLY REPORT
 # =====================================================
 def monthly_report(request):
-    month = request.GET.get('month')  # YYYY-MM
+    month = request.GET.get('month')
 
     entries = []
     total_liter = 0
@@ -100,7 +112,7 @@ def monthly_report(request):
 
 
 # =====================================================
-# MONTHLY EXCEL DOWNLOAD
+# MONTHLY EXCEL
 # =====================================================
 def monthly_excel(request):
     month = request.GET.get('month')
@@ -109,7 +121,7 @@ def monthly_excel(request):
     ws = wb.active
     ws.title = "Monthly Report"
 
-    ws.append(["Date", "Time", "Liter", "Price/L", "Amount"])
+    ws.append(["Date", "Time", "Milk", "Liter", "Price/L", "Amount"])
 
     total = 0
 
@@ -127,6 +139,7 @@ def monthly_excel(request):
         ws.append([
             dt.strftime("%d-%m-%Y"),
             dt.strftime("%I:%M %p"),
+            e.milk_type,
             e.liter,
             e.price_per_liter,
             e.amount
@@ -134,14 +147,13 @@ def monthly_excel(request):
         total += e.amount
 
     ws.append([])
-    ws.append(["", "", "", "Total", total])
+    ws.append(["", "", "", "", "Total", total])
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = 'attachment; filename=monthly_report.xlsx'
     wb.save(response)
-
     return response
 
 
@@ -166,7 +178,7 @@ def download_pdf(request):
 
     for e in entries:
         dt = localtime(e.created_at)
-        line = f"{dt.strftime('%d %b %Y %I:%M %p')} | {e.liter} L | ₹{e.amount}"
+        line = f"{dt.strftime('%d %b %Y %I:%M %p')} | {e.milk_type} | {e.liter} L | ₹{e.amount}"
         p.drawString(50, y, line)
         total += e.amount
         y -= 20
@@ -201,17 +213,11 @@ def edit_entry(request, entry_id):
     price = Price.objects.last()
 
     if request.method == "POST":
+        milk_type = request.POST.get('milk_type')
         liter = float(request.POST['liter'])
         new_price = float(request.POST['price_per_liter'])
 
-        # Update global price
-        if price:
-            price.price_per_liter = new_price
-            price.save()
-        else:
-            price = Price.objects.create(price_per_liter=new_price)
-
-        # Update entry
+        entry.milk_type = milk_type
         entry.liter = liter
         entry.price_per_liter = new_price
         entry.amount = liter * new_price

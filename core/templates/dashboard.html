@@ -6,11 +6,78 @@
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<style>
+/* Keep table layout same, just allow horizontal scroll */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent column breaking */
+.table {
+  min-width: 900px;
+}
+</style>
+
+
+
   </head>
 
   <body class="bg-light">
     <div class="container py-4">
       <h2 class="mb-4 text-center">Milk Entry Dashboard</h2>
+
+      <!-- ADD ENTRY CARD -->
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3 align-items-end">
+              <!-- ✅ MILK TYPE (READ ONLY – SELECTED ONE TIME) -->
+              <!-- MILK TYPE (SELECT ONCE, EDITABLE LATER) -->
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">દૂધનો પ્રકાર</label>
+
+                <select name="milk_type" id="milkType" class="form-select" onchange="setMilkPrice()">
+                  <option value="">Select milk</option>
+
+                  {% if milk and milk.milk_type == 'cow' %}
+                    <option value="cow" selected>🐄 ગાયનું દૂધ</option>
+                  {% else %}
+                    <option value="cow">🐄 ગાયનું દૂધ</option>
+                  {% endif %}
+
+                  {% if milk and milk.milk_type == 'buffalo' %}
+                    <option value="buffalo" selected>🐃 ભેંસનું દૂધ</option>
+                  {% else %}
+                    <option value="buffalo">🐃 ભેંસનું દૂધ</option>
+                  {% endif %}
+                </select>
+              </div>
+
+              <!-- LITER -->
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">કેટલા લિટર દૂધ?</label>
+                <select name="liter" class="form-select" required>
+                  <option value="4">4 લિટર</option>
+                  <option value="5">5 લિટર</option>
+                  <option value="6">6 લિટર</option>
+                  <option value="8">8 લિટર</option>
+                  <option value="10">10 લિટર</option>
+                  <option value="12">12 લિટર</option>
+                </select>
+              </div>
+
+              <!-- BUTTON -->
+              <div class="col-12 col-md-4 d-grid">
+                <button class="btn btn-success w-100">➕ Add Entry</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
       <!-- PRICE CARD -->
       <div class="card mb-4 shadow-sm">
@@ -18,10 +85,9 @@
           <form method="post" class="row g-3 align-items-end">
             {% csrf_token %}
             <div class="col-md-6">
-              {% comment %} <label class="form-label">Price per Liter</label> {% endcomment %}
-              <b><label class="form-label">લિટર દીઠ કિંમત</label></b>
-
-              <input type="number" step="0.01" name="price_per_liter" value="{{ price.price_per_liter|default:'' }}" class="form-control" required />
+              <label class="form-label">લિટર દીઠ કિંમત</label>
+              {% comment %} value="{{ price.price_per_liter|default:'' }}" {% endcomment %}
+              <input type="number" step="0.01" name="price_per_liter" id="priceInput"  class="form-control" required />
             </div>
             <div class="col-md-3">
               <button class="btn btn-primary w-100" style="height:42px;">Save Price</button>
@@ -30,11 +96,10 @@
         </div>
       </div>
 
-      <!-- FILTER + ENTRY -->
+      <!-- FILTER -->
       <div class="card mb-4 shadow-sm">
         <div class="card-body">
-          <!-- DATE FILTER -->
-          <form method="get" class="row g-3 align-items-end mb-4">
+          <form method="get" class="row g-3 align-items-end">
             <div class="col-md-4">
               <label class="form-label">Filter by Date</label>
               <input type="date" name="date" value="{{ selected_date }}" class="form-control" />
@@ -46,27 +111,6 @@
               <a href="/" class="btn btn-outline-dark w-100" style="height:42px; line-height:28px;">Reset</a>
             </div>
           </form>
-
-          <!-- ADD ENTRY -->
-          <form method="post" class="row g-3 align-items-end">
-            {% csrf_token %}
-            <div class="col-md-4">
-              {% comment %} <label class="form-label">Milk Quantity</label> {% endcomment %}
-              {% comment %} <label class="form-label">દૂધનો જથ્થો</label> {% endcomment %}
-              <b><label class="form-label">કેટલા લિટર દૂધ?</label></b>
-              <select name="liter" class="form-select">
-                <option value="4">4 લિટર</option>
-                <option value="5">5 લિટર</option>
-                <option value="6">6 લિટર</option>
-                <option value="8">8 લિટર</option>
-                <option value="10">10 લિટર</option>
-                <option value="12">12 લિટર</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <button class="btn btn-success w-100">Add Entry</button>
-            </div>
-          </form>
         </div>
       </div>
 
@@ -75,7 +119,6 @@
         <div class="col-md-6">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              {% comment %} <h6 class="text-muted">Total Liter</h6> {% endcomment %}
               <h6 class="text-muted">કુલ લિટર</h6>
               <h2 class="text-primary">{{ total_liter }} L</h2>
             </div>
@@ -85,29 +128,21 @@
           <div class="card text-center shadow-sm">
             <div class="card-body">
               <h6 class="text-muted">કુલ રકમ</h6>
-              {% comment %} <h6 class="text-muted">Total Amount</h6> {% endcomment %}
               <h2 class="text-success">₹ {{ total_amount }}</h2>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- DOWNLOAD BUTTONS -->
-      {% if entries %}
-        <div class="d-flex gap-2 mb-4">
-          <a href="/monthly-excel/?month={{ entries.0.date|date:'Y-m' }}" class="btn btn-outline-success">⬇ Download Monthly Excel</a>
-          <a href="/download-pdf/" class="btn btn-outline-success">⬇ Download PDF</a>
-        </div>
-      {% endif %}
-
       <!-- TABLE -->
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle" style="white-space: nowrap;">
+            <table class="table table-striped table-bordered align-middle">
               <thead class="table-dark">
                 <tr>
                   <th>Date</th>
+                  <th>Milk</th>
                   <th>Liter</th>
                   <th>Price / L</th>
                   <th>Amount</th>
@@ -117,30 +152,71 @@
               <tbody>
                 {% for e in entries %}
                   <tr>
-                    <td>
-                      {{ e.created_at|date:'d M Y' }}<br />
+                    <td data-label="Date">
+                      {{ e.created_at|date:'d M Y' }}<br>
                       <small class="text-muted">{{ e.created_at|date:'h:i A' }}</small>
                     </td>
-                    <td>{{ e.liter }} L</td>
-                    <td>₹ {{ e.price_per_liter }}</td>
-                    <td>₹ {{ e.amount }}</td>
-                    <td class="text-center">
-                      <div class="d-flex justify-content-center gap-1">
+                  
+                    <td data-label="Milk">
+                      {% if e.milk_type == 'cow' %}
+                        🐄 ગાયનું દૂધ
+                      {% else %}
+                        🐃 ભેંસનું દૂધ
+                      {% endif %}
+                    </td>
+                  
+                    <td data-label="Liter">
+                      {{ e.liter }} લિટર
+                    </td>
+                  
+                    <td data-label="Price / L">
+                      ₹ {{ e.price_per_liter }}
+                    </td>
+                  
+                    <td data-label="Amount">
+                      ₹ {{ e.amount }}
+                    </td>
+                  
+                    <td data-label="Action">
+                      <div class="action-btns">
                         <a href="/edit/{{ e.id }}/" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="/delete/{{ e.id }}/" onclick="return confirm('Delete this entry?');" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="/delete/{{ e.id }}/"
+                           onclick="return confirm('Delete this entry?');"
+                           class="btn btn-sm btn-danger">Delete</a>
                       </div>
                     </td>
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="4" class="text-center text-muted py-4">No entries found</td>
+                    <td colspan="6" class="text-center text-muted py-4">No entries found</td>
                   </tr>
                 {% endfor %}
               </tbody>
+
             </table>
           </div>
         </div>
       </div>
     </div>
+
+    <script>
+  function setMilkPrice() {
+    const milkType = document.getElementById("milkType").value;
+    const priceInput = document.getElementById("priceInput");
+
+    if (milkType === "cow") {
+      priceInput.value = 42;
+    }
+    else if (milkType === "buffalo") {
+      priceInput.value = 88;
+    }
+  }
+
+  // Auto-set price on page load
+  window.onload = function () {
+    setMilkPrice();
+  };
+</script>
+
   </body>
 </html>
