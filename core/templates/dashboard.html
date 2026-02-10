@@ -134,6 +134,14 @@
         </div>
       </div>
 
+      <!-- DOWNLOAD BUTTONS -->
+      {% if entries %}
+        <div class="d-flex gap-2 mb-4">
+          <a href="/monthly-excel/?month={{ entries.0.date|date:'Y-m' }}" class="btn btn-outline-success">⬇ Download Monthly Excel</a>
+          <a href="/download-pdf/" class="btn btn-outline-success">⬇ Download PDF</a>
+        </div>
+      {% endif %}
+
       <!-- TABLE -->
       <div class="card shadow-sm">
         <div class="card-body">
