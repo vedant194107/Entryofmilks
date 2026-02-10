@@ -213,10 +213,14 @@ def edit_entry(request, entry_id):
     price = Price.objects.last()
 
     if request.method == "POST":
-        milk_type = request.POST.get('milk_type')
         liter = float(request.POST['liter'])
         new_price = float(request.POST['price_per_liter'])
 
+        # 🟢 IMPORTANT FIX HERE
+        milk_type = request.POST.get('milk_type', entry.milk_type)
+        # If milk_type not sent → keep old value
+
+        # Update entry
         entry.milk_type = milk_type
         entry.liter = liter
         entry.price_per_liter = new_price
@@ -229,6 +233,7 @@ def edit_entry(request, entry_id):
         'entry': entry,
         'price': price
     })
+
 
 
 @api_view(['GET'])
