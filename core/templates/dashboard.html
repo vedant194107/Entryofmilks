@@ -188,9 +188,14 @@
                     <td data-label="Action">
                       <div class="action-btns">
                         <a href="/edit/{{ e.id }}/" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="/delete/{{ e.id }}/"
-                           onclick="return confirm('Delete this entry?');"
-                           class="btn btn-sm btn-danger">Delete</a>
+                        <form action="/delete/{{ e.id }}/" method="post"
+                              style="display:inline;">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-sm btn-danger">
+                            Delete
+                          </button>
+                        </form>
+
                       </div>
                     </td>
                   </tr>
@@ -216,7 +221,7 @@
       priceInput.value = 42;
     }
     else if (milkType === "buffalo") {
-      priceInput.value = 88;
+      priceInput.value = 80;
     }
   }
 

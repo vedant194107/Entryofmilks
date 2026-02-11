@@ -9,9 +9,11 @@ from .models import Price, Entry
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from django.views.decorators.http import require_POST
+
 MILK_PRICES = {
     'cow': 42,
-    'buffalo': 88,
+    'buffalo': 80,
 }
 
 
@@ -200,6 +202,7 @@ def download_pdf(request):
 # =====================================================
 # DELETE ENTRY
 # =====================================================
+@require_POST
 def delete_entry(request, entry_id):
     Entry.objects.filter(id=entry_id).delete()
     return redirect('dashboard')
